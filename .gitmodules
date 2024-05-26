@@ -1,0 +1,3 @@
+[submodule "modules/subworkflows"]
+	path = modules/subworkflows
+	url = https://github.com/nexomis/nf-subworkflows.git
