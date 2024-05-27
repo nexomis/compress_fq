@@ -1,0 +1,84 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/testpipeline/master/nextflow_schema.json",
+    "title": "nexomis/compress_fq pipeline parameters",
+    "description": "Compress and check ",
+    "type": "object",
+    "defs": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": ["input_dir", "output_dir"],
+            "properties": {
+                "input_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true, 
+                    "description": "The input directory with uncompressed fastq files."
+                },
+                "output_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure."
+                }
+            }
+        },
+        "compression_options": {
+            "title": "Compression options",
+            "type": "object",
+            "description": "Define the option for compression using spring (https://github.com/shubhamchandak94/Spring).",
+            "required": [],
+            "properties": {
+                "quality_mode": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "default": "lossless",
+                    "enum": ["lossless", "ill_bin"],
+                    "description": "Mode for quality conservation, either 'lossless' or 'ill_bin' using Illumina 8-level binning."
+                },
+                "drop_order": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to drop ordering of reads."
+                },
+                "drop_ids": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to drop read ids."
+                }
+            }
+        },
+        "check_options": {
+            "title": "Check options",
+            "type": "object",
+            "description": "Define the option regarding the check of conserved sequence after decompression.",
+            "required": [],
+            "properties": {
+                "hash_algo": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "default": "",
+                    "enum": ["", "md5", "sha1", "sha224", "sha256", "sha384", "sha512", "sha3_224", "sha3_256", "sha3_384", "sha3_512", "shake_128", "shake_256", "blake2b", "blake2s"],
+                    "description": "Algorithm to build an hash digest of reads before checking identity based on occurences. To spare memory. Must be in python hashlib. Default is None."
+                },
+                "n_bytes": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences. Default is to take all bytes from the hash"
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/defs/input_output_options"
+        },
+        {
+            "$ref": "#/defs/compression_options"
+        },
+        {
+            "$ref": "#/defs/check_options"
+        }
+    ]
+}

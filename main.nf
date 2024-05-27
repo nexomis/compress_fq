@@ -1,61 +1,28 @@
 #!/usr/bin/env nextflow
 
-if ( params.help ) {
-  help = """
-    |________________________________________________________________________________
-    |                _  _                             _      
-    |               | \\| |  ___  __ __  ___   _ __   (_)  ___
-    |               | .` | / -_) \\ \\ / / _ \\ | '  \\  | | (_-<
-    |               |_|\\_| \\___| /_\\_\\ \\___/ |_|_|_| |_| /__/
-    |                                      
-    |_#################______________________________________________________________
-    | ## compress_fq ##
-    |_#################______________________________________________________________
+include { validateParameters; paramsHelp; paramsSummaryLog; samplesheetToList } from 'plugin/nf-schema'
+
+// Print help message, supply typical command line usage for the pipeline
+
+log.info """
+    |            #################################################
+    |            #    _  _                             _         #
+    |            #   | \\| |  ___  __ __  ___   _ __   (_)  __    #
+    |            #   | .` | / -_) \\ \\ / / _ \\ | '  \\  | | (_-<   #
+    |            #   |_|\\_| \\___| /_\\_\\ \\___/ |_|_|_| |_| /__/   #
+    |            #                                               #
+    |            #################################################
     |
-    | A workflow for the compression of fastq files with a step to check the sequence
-    |  identity after decompression even with loosy compression regardeing, read 
-    |  order, read identities and qualities.  
-    |
-    |_#################______________________________________________________________
-    | ## Input/Ouput ##
-    |_#################______________________________________________________________
-    |
-    |  --input_dir      Input directory with uncompressed fastq files.
-    |                    Potentially in gzip, auto id paired and single reads
-    |
-    |  --output_dir     Output directory with compressed files (.spring)
-    |
-    |_###########################____________________________________________________
-    | ## Compression Arguments ##
-    |_###########################____________________________________________________
-    |
-    |  --quality_mode   "lossless" (default)
-    |                   "qvz qv_ratio" (QVZ lossy compression, parameter qv_ratio 
-    |                     roughly corresponds to bits used per quality value)
-    |                   "ill_bin" (Illumina 8-level binning)
-    |                   "binary thr" high low (binary (2-level) thresholding, quality
-    |                     binned to high if >= thr and to low if < thr)
-    |
-    |  --drop_order     true/false, whether to drop reads ordering
-    |
-    |  --drop_ids       true/false, whether to drop reads ids
-    |
-    |_#####################__________________________________________________________
-    | ## Check Arguments ##
-    |_#####################__________________________________________________________
-    |
-    |  --hash_algo      Algorithm to build an hash digest of reads before  checking 
-    |                    identity based on occurences. To spare memory. Must be in 
-    |                    python hashlib. Default is None.
-    |                   
-    |  --n_bytes        Only in combination with hash_algo. Number of bytes to use to
-    |                    count occurences. Default is to take all bytes from the hash
-    |________________________________________________________________________________
-    """.stripMargin()
-  // Print the help with the stripped margin and exit
-  println(help)
-  exit(0)
+    | compress_fq: Compress fastq files from a directory and check integrity.
+    |                          
+    |""".stripMargin()
+
+if (params.help) {
+  log.info paramsHelp("nextflow run nexomis/compress_fq --input_dir /path/to/fastq/dir --output_dir /path/to/out/dir")
+  exit 0
 }
+validateParameters()
+log.info paramsSummaryLog(workflow)
 
 // Validate input parameters
 if (params.input_dir == null) {
