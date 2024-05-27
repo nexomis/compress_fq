@@ -45,7 +45,7 @@ process COMPRESS {
   tuple val(sample_name), path(files, arity: 1..2)
 
   output:
-  tuple val("${sample_name}"), path("${sample_name}.spring*fq", arity: 1..2), emit: fastq
+  tuple val("${sample_name}"), path("${sample_name}.spring*fq.gz", arity: 1..2), emit: fastq
   tuple val("${sample_name}"), path("${sample_name}.spring", arity: 1), emit: spring
 
   script:
@@ -57,7 +57,7 @@ process COMPRESS {
     ${params.drop_ids ? '--no-ids' : ''} \\
     ${files[0].toString().endsWith('.gz') || files[0].toString().endsWith('.gzip') || files[0].toString().endsWith('.z') ? '-g' : ''}
 
-  spring -d -t ${task.cpus} -i ${sample_name}.spring -o ${sample_name}.spring${files.size() > 1 ? '.1' : '' }.fq ${files.size() > 1 ? sample_name + '.spring.2.fq' : '' }
+  spring -d -g -t ${task.cpus} -i ${sample_name}.spring -o ${sample_name}.spring${files.size() > 1 ? '.1' : '' }.fq.gz ${files.size() > 1 ? sample_name + '.spring.2.fq.gz' : '' }
 
   """
 
