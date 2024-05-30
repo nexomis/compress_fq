@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/testpipeline/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nexomis/compress_fq/1.0.5/nextflow_schema.json",
     "title": "nexomis/compress_fq pipeline parameters",
     "description": "Compress and check ",
     "type": "object",
