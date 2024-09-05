@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-include { validateParameters; paramsHelp; paramsSummaryLog; samplesheetToList } from 'plugin/nf-schema'
+include { validateParameters; paramsHelp; paramsSummaryLog } from 'plugin/nf-validation'
 
 // Print help message, supply typical command line usage for the pipeline
 
@@ -14,75 +14,27 @@ log.info """
     |            #################################################
     |
     | compress_fq: Compress fastq files from a directory and check integrity.
-    |                          
+    |
     |""".stripMargin()
 
 if (params.help) {
-  log.info paramsHelp("nextflow run nexomis/compress_fq --input_dir /path/to/fastq/dir --output_dir /path/to/out/dir")
+  log.info paramsHelp("nextflow run nexomis/compress_fq --in_dir /path/to/fastq/dir --out_dir /path/to/out/dir")
   exit 0
 }
 validateParameters()
 log.info paramsSummaryLog(workflow)
 
-// Validate input parameters
-if (params.input_dir == null) {
-  error """No input directory provided. Use --input_dir.""".stripMargin()
-}
-
-if (params.output_dir == null) {
-  error """No output directory provided. Use --output_dir.""".stripMargin()
-}
-
-process COMPRESS {
-  container 'ghcr.io/nexomis/spring:1.1.1'
-
-  publishDir "${params.output_dir}/", mode: 'link', pattern: "${sample_name}.spring"
-
-  label 'cpu_x4'
-  label 'mem_16G'
-
-  input:
-  tuple val(sample_name), path(files, arity: 1..2)
-
-  output:
-  tuple val("${sample_name}"), path("${sample_name}.spring*fq.gz", arity: 1..2), emit: fastq
-  tuple val("${sample_name}"), path("${sample_name}.spring", arity: 1), emit: spring
-
-  script:
-  """
-  #!/usr/bin/bash
-
-  spring -q ${params.quality_mode} -t ${task.cpus} -c -i ${files} -o ${sample_name}.spring \\
-    ${params.drop_order ? '-r' : ''} \\
-    ${params.drop_ids ? '--no-ids' : ''} \\
-    ${files[0].toString().endsWith('.gz') || files[0].toString().endsWith('.gzip') || files[0].toString().endsWith('.z') ? '-g' : ''}
-
-  spring -d -g -t ${task.cpus} -i ${sample_name}.spring -o ${sample_name}.spring${files.size() > 1 ? '.1' : '' }.fq.gz ${files.size() > 1 ? sample_name + '.spring.2.fq.gz' : '' }
-
-  """
-
-  stub:
-  """
-  #!/usr/bin/bash
-
-  touch ${sample_name}.spring ${sample_name}.spring${files.size() > 1 ? '.1' : '' }.fq ${files.size() > 1 ? sample_name + '.spring.2.fq' : '' }
-
-  """
-}
-
 process CHECK {
   container 'ghcr.io/nexomis/check_fastq:1.0'
 
-  label 'cpu_x1'
-  label 'mem_2G'
-
-  publishDir "${params.output_dir}/.check_fastq/", mode: 'link', pattern: "${sample_name}.yml"
+  publishDir "${params.out_dir}/.check_fastq/", mode: 'link', pattern: "*.yml"
 
   input:
-  tuple val(sample_name), path(spring_files, arity: 1..2), path(original_files, arity: 1..2)
+  tuple val(meta), path(spring_files, arity: 1..2)
+  tuple val(meta2), path(original_files, arity: 1..2)
 
   output:
-  tuple val("${sample_name}"), path("${sample_name}.yml", arity: 1)
+  tuple val(meta), path("${meta.id}.yml", arity: 1)
 
   script:
   """
@@ -93,10 +45,10 @@ process CHECK {
   -f2 ${original_files[0]} ${original_files.size() > 1 ? '-r2 ' + original_files[1] : '' } \\
   ${params.hash_algo != "" ? "--hash " + params.hash_algo : ''} \\
   ${params.n_bytes != 0 ? "--n_bytes " + params.n_bytes : ''} \\
-  > ${sample_name}.yml
+  > ${meta.id}.yml
 
   # Read the first line of the file
-  first_line=\$(head -n 1 "${sample_name}.yml")
+  first_line=\$(head -n 1 "${meta.id}.yml")
 
   # Check if the first line matches the expected text
   if [ "\$first_line" = "sequences_equal: True" ]; then
@@ -131,19 +83,24 @@ process CHECK {
 }
 
 include { PARSE_SEQ_DIR } from './modules/subworkflows/parse_seq_dir/main.nf'
+include { SPRING_COMPRESS } from './modules/process/spring/compress/main.nf'
+include { SPRING_DECOMPRESS } from './modules/process/spring/decompress/main.nf'
 
 workflow {
 
-  Channel.fromPath(params.input_dir, type: 'dir')
+  Channel.fromPath(params.in_dir, type: 'dir', checkIfExists: true)
   | PARSE_SEQ_DIR
-  | set {reads}
 
-  reads.paired
-  | concat(reads.single)
-  | set {allReads}
+  reads = PARSE_SEQ_DIR.out.fastq
 
-  COMPRESS(allReads).fastq
-  | map { return tuple(it[0], it[1].sort { a, b -> a.name <=> b.name }) }
-  | join(allReads, by: 0)
-  | CHECK
+  SPRING_COMPRESS(reads)
+  SPRING_DECOMPRESS(SPRING_COMPRESS.out)
+  
+  SPRING_DECOMPRESS.out
+  | map {[it[0].id, it]}
+  | join(reads.map {[it[0].id, it]})
+  | set { joinReads }
+  
+  CHECK(joinReads.map {it[1]}, joinReads.map {it[2]})
+
 }
