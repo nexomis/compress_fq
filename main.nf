@@ -107,12 +107,29 @@ workflow {
 
 }
 
+def parseOutDir(outDir) {
+    def idx = outDir.lastIndexOf('/')
+    if (idx == -1) {
+        return [path: '', prefix: outDir]
+    } else {
+        def prefix = outDir.substring(idx + 1)
+        def path = outDir.substring(0, idx + 1)
+        return [path: path, prefix: prefix]
+    }
+}
+
+def parsed_out_dir = parseOutDir(params.out_dir)
+
 output {
+  directory "${parsed_out_dir.path ?: '.'}"
   mode params.publish_dir_mode
+
   'spring' {
-    path "${params.out_dir}"
+    path "${parsed_out_dir.prefix}"
   }
+
   'check' {
-    path "${params.out_dir}/.checkfastq"
-  }
+    path "${parsed_out_dir.prefix}/.checkfastq"
+  } 
+
 }
