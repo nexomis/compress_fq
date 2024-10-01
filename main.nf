@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-
+nextflow.preview.output = true
 include { validateParameters; paramsHelp; paramsSummaryLog } from 'plugin/nf-validation'
 
 // Print help message, supply typical command line usage for the pipeline
@@ -26,8 +26,6 @@ log.info paramsSummaryLog(workflow)
 
 process CHECK {
   container 'ghcr.io/nexomis/check_fastq:1.0'
-
-  publishDir "${params.out_dir}/.check_fastq/", mode: 'link', pattern: "*.yml"
 
   input:
   tuple val(meta), path(spring_files, arity: 1..2)
@@ -103,4 +101,16 @@ workflow {
   
   CHECK(joinReads.map {it[1]}, joinReads.map {it[2]})
 
+  publish:
+  SPRING_COMPRESS.out >> 'spring'
+  CHECK.out >> '.checkfastq'
+
+}
+
+output {
+  directory "${params.out_dir}"
+  mode params.publish_dir_mode
+  'spring' {
+    path "."
+  }
 }

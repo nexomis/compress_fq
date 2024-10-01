@@ -69,8 +69,8 @@
                 },
                 "n_bytes": {
                     "type": "integer",
-                    "default": 8,
-                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences. Default is to take all bytes from the hash"
+                    "default": 0,
+                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences. Default (=0) is to take all bytes from the hash"
                 }
             }
         },
@@ -85,13 +85,13 @@
                     "description": "Number of cpu."
                 },
                 "mem_spring": {
-                    "type": "integer",
-                    "default": 8,
+                    "type": "number",
+                    "default": 15,
                     "description": "Memory for process."
                 },
                 "mem_check": {
-                    "type": "integer",
-                    "default": 2,
+                    "type": "number",
+                    "default": 3.5,
                     "description": "Memory for check process (ncpus=1)."
                 }
             }
