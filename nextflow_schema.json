@@ -69,8 +69,8 @@
                 },
                 "n_bytes": {
                     "type": "integer",
-                    "default": 0,
-                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences. Default (=0) is to take all bytes from the hash"
+                    "default": 4,
+                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences (=0 to take all). Default (=4)"
                 }
             }
         },
