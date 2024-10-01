@@ -103,14 +103,16 @@ workflow {
 
   publish:
   SPRING_COMPRESS.out >> 'spring'
-  CHECK.out >> '.checkfastq'
+  CHECK.out >> 'check'
 
 }
 
 output {
-  directory "${params.out_dir}"
   mode params.publish_dir_mode
   'spring' {
-    path "."
+    path "${params.out_dir}/"
+  }
+  'check' {
+    path "${params.out_dir}/.checkfastq"
   }
 }
