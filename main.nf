@@ -110,7 +110,7 @@ workflow {
 output {
   mode params.publish_dir_mode
   'spring' {
-    path "${params.out_dir}/"
+    path "${params.out_dir}"
   }
   'check' {
     path "${params.out_dir}/.checkfastq"
