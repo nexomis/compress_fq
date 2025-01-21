@@ -21,86 +21,26 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure."
-                },
-                "publish_dir_mode": {
-                    "type": "string",
-                    "description": "PublishDir mode for process",
-                    "default": "link"
                 }
             }
         },
         "compression_options": {
             "title": "Compression options",
             "type": "object",
-            "description": "Define the option for compression using spring (https://github.com/shubhamchandak94/Spring).",
-            "required": [],
+            "description": "Parameters for controlling compression behavior.",
             "properties": {
-                "quality_mode": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "default": "ill_bin",
-                    "enum": ["lossless", "ill_bin"],
-                    "description": "Mode for quality conservation, either 'lossless' or 'ill_bin' using Illumina 8-level binning."
-                },
-                "drop_order": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Whether to drop ordering of reads."
-                },
-                "drop_ids": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Whether to drop read ids."
-                }
-            }
-        },
-        "check_options": {
-            "title": "Check options",
-            "type": "object",
-            "description": "Define the option regarding the check of conserved sequence after decompression.",
-            "required": [],
-            "properties": {
-                "hash_algo": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "default": "md5",
-                    "enum": ["", "md5", "sha1", "sha224", "sha256", "sha384", "sha512", "sha3_224", "sha3_256", "sha3_384", "sha3_512", "shake_128", "shake_256", "blake2b", "blake2s"],
-                    "description": "Algorithm to build an hash digest of reads before checking identity based on occurences. To spare memory. Must be in python hashlib. Default is None."
-                },
-                "n_bytes": {
+                "compression_level": {
                     "type": "integer",
-                    "default": 4,
-                    "description": "Only in combination with hash_algo. Number of bytes to use to count occurences (=0 to take all). Default (=4)"
-                }
-            }
-        },
-        "resources_options": {
-            "title": "Resources options",
-            "type": "object",
-            "description": "Define The default resources for nextflow",
-            "properties": {
-                "ncpus": {
-                    "type": "integer",
-                    "default": 4,
-                    "description": "Number of cpu."
-                },
-                "mem_spring": {
-                    "type": "number",
-                    "default": 15,
-                    "description": "Memory for process."
-                },
-                "mem_check": {
-                    "type": "number",
-                    "default": 3.5,
-                    "description": "Memory for check process (ncpus=1)."
+                    "description": "Compression level (1-4) for slimfastq compression. Higher values provide better compression but take longer.",
+                    "default": 3,
+                    "minimum": 1,
+                    "maximum": 4
                 }
             }
         }
     },
     "allOf": [
         {"$ref": "#/definitions/input_output_options"},
-        {"$ref": "#/definitions/compression_options"},
-        {"$ref": "#/definitions/check_options" },
-        {"$ref": "#/definitions/resources_options"}
+        {"$ref": "#/definitions/compression_options"}
     ]
 }

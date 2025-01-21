@@ -1,3 +1,4 @@
 /work
 .nextflow*
 /data/test/out_dir
+/pipeline_info

@@ -1,5 +1,2 @@
 in_dir: "data/test/input_dir"
 out_dir: "data/test/out_dir"
-drop_order: true
-drop_ids: true
-quality_mode: ill_bin

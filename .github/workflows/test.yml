@@ -1,0 +1,11 @@
+name: Test Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    uses: nexomis/nf-test-workflow/.github/workflows/nf-test.yml@main
