@@ -55,7 +55,7 @@ def parseOutDir(outDir) {
 output {
 
   'slimfastq' {
-    path ""
+    path "."
   }
 
 }

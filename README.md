@@ -1,3 +1,5 @@
+[![Test Pipeline](https://github.com/nexomis/compress_fq/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/nexomis/compress_fq/actions/workflows/test.yml)
+
 # Compress FQ
 
 ## Introduction
