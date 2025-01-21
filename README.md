@@ -7,3 +7,4 @@ compress_fq is a workflow to compress fastq and fastq.gz files into spring files
 ## Schema
 
 ![Schema not visible](./schema.drawio.svg)
+
