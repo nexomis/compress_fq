@@ -30,6 +30,9 @@ include { SLIMFASTQ_COMPRESS } from './modules/process/slimfastq/compress/main.n
 workflow {
 
   Channel.fromPath(params.in_dir, type: 'dir', checkIfExists: true)
+  | map { path -> 
+       [ [depth: params.depth], path ] 
+   }
   | PARSE_SEQ_DIR
 
   reads = PARSE_SEQ_DIR.out.fastq
