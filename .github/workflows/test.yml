@@ -9,3 +9,5 @@ on:
 jobs:
   test:
     uses: nexomis/nf-test-workflow/.github/workflows/nf-test.yml@main
+    with:
+      nextflow_version: '25.04.3'
