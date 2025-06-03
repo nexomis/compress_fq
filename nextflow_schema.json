@@ -43,10 +43,33 @@
                     "maximum": 4
                 }
             }
+        },
+        "parsing_options": {
+            "title": "Filename parsing options",
+            "type": "object",
+            "description": "Parameters for controlling how filenames are parsed to extract sample names.",
+            "properties": {
+                "tail_pattern": {
+                    "type": "string",
+                    "description": "Regex pattern to remove tail suffixes from filenames (e.g., '_001' suffixes).",
+                    "default": "_\\d{3}$"
+                },
+                "read_pattern": {
+                    "type": "string",
+                    "description": "Regex pattern to extract read numbers from filenames (e.g., '_R1', '_R2').",
+                    "default": "_R([12])$"
+                },
+                "lane_pattern": {
+                    "type": "string",
+                    "description": "Regex pattern to remove lane information from filenames (e.g., '_S10_L001').",
+                    "default": "_S\\d+_L\\d+$"
+                }
+            }
         }
     },
     "allOf": [
         {"$ref": "#/definitions/input_output_options"},
-        {"$ref": "#/definitions/compression_options"}
+        {"$ref": "#/definitions/compression_options"},
+        {"$ref": "#/definitions/parsing_options"}
     ]
 }

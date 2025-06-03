@@ -1,10 +1,17 @@
 #!/usr/bin/env nextflow
-nextflow.preview.output = true
 include { validateParameters; paramsHelp; paramsSummaryLog } from 'plugin/nf-validation'
+include { 
+  PARSE_SEQ_DIR 
+} from './modules/subworkflows/parse_seq_dir/main.nf'
+include { SLIMFASTQ_COMPRESS } from './modules/process/slimfastq/compress/main.nf'
+
+nextflow.preview.output = true
 
 // Print help message, supply typical command line usage for the pipeline
 
-log.info """
+workflow {
+  main:
+  log.info """
     |            #################################################
     |            #    _  _                             _         #
     |            #   | \\| |  ___  __ __  ___   _ __   (_)  __    #
@@ -17,21 +24,23 @@ log.info """
     |
     |""".stripMargin()
 
-if (params.help) {
-  log.info paramsHelp("nextflow run nexomis/compress_fq --in_dir /path/to/fastq/dir --out_dir /path/to/out/dir")
-  exit 0
-}
-validateParameters()
-log.info paramsSummaryLog(workflow)
-
-include { PARSE_SEQ_DIR } from './modules/subworkflows/parse_seq_dir/main.nf'
-include { SLIMFASTQ_COMPRESS } from './modules/process/slimfastq/compress/main.nf'
-
-workflow {
+  if (params.help) {
+    log.info paramsHelp("nextflow run nexomis/compress_fq --in_dir /path/to/fastq/dir --out_dir /path/to/out/dir")
+    exit 0
+  }
+  validateParameters()
+  log.info paramsSummaryLog(workflow)
 
   Channel.fromPath(params.in_dir, type: 'dir', checkIfExists: true)
   | map { path -> 
-       [ [depth: params.depth], path ] 
+       [ [
+         depth: params.depth,
+         parsingArgs: [
+           tailPattern: params.tail_pattern,
+           readPattern: params.read_pattern,
+           lanePattern: params.lane_pattern
+         ]
+       ], path ] 
    }
   | PARSE_SEQ_DIR
 
@@ -40,25 +49,11 @@ workflow {
   SLIMFASTQ_COMPRESS(reads)
 
   publish:
-  SLIMFASTQ_COMPRESS.out >> 'slimfastq'
-
-}
-
-def parseOutDir(outDir) {
-    def idx = outDir.lastIndexOf('/')
-    if (idx == -1) {
-        return [path: '', prefix: outDir]
-    } else {
-        def prefix = outDir.substring(idx + 1)
-        def path = outDir.substring(0, idx + 1)
-        return [path: path, prefix: prefix]
-    }
+  slimfastq = SLIMFASTQ_COMPRESS.out
 }
 
 output {
-
-  'slimfastq' {
+  slimfastq {
     path "."
   }
-
 }
