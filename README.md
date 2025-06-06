@@ -10,3 +10,8 @@ compress_fq is a workflow to compress fastq and fastq.gz files into spring files
 
 ![Schema not visible](./schema.drawio.svg)
 
+## Usage
+
+```
+nextflow run nexomis/compress_fq --help
+```
